@@ -3,6 +3,8 @@ package com.tfflabs.soundfoundry.services;
 import java.util.Collections;
 import java.util.List;
 
+import javax.annotation.PostConstruct;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -28,6 +30,11 @@ public class RoomService {
 	@Autowired
 	private SimpMessagingTemplate template;
 
+	@PostConstruct
+	public void temporalSetup(){
+		addRoom("myroom");
+	}
+	
 	public void addRoom(String roomName) {
 		Room room = new Room(roomName);
 		roomRepository.save(room);
