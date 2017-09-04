@@ -32,7 +32,12 @@ public class RoomService {
 
 	@PostConstruct
 	public void temporalSetup(){
-		addRoom("myroom");
+		String room = "myroom";
+		try{
+			System.out.println(getRoomByName(room).getName() + " OBTAINED!!");
+		}catch (Exception e) {
+			addRoom(room);
+		}
 	}
 	
 	public void addRoom(String roomName) {
