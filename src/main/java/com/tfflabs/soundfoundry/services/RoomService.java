@@ -36,8 +36,17 @@ public class RoomService {
 		try{
 			System.out.println(getRoomByName(room).getName() + " OBTAINED!!");
 		}catch (Exception e) {
-			addRoom(room);
+			Room newRoom = new Room("myroom");
+			newRoom.setDescription("Awesome testing room");
+			addRoom(newRoom);
 		}
+	}
+	
+	public void addRoom(Room room) {
+		if (room == null) {
+			throw new IllegalArgumentException("Room can not be null.");
+		}
+		roomRepository.save(room);
 	}
 	
 	public void addRoom(String roomName) {

@@ -83,7 +83,20 @@ public class RoomServiceTest {
 
 	@Test(expected = IllegalArgumentException.class)
 	public void addRoomNullName() {
-		roomService.addRoom(null);
+		String roomName = null;
+		roomService.addRoom(roomName);
+	}
+
+	public void addRoomObject() {
+		Room myRoom = new Room("roomName");
+		myRoom.setDescription("description");
+		roomService.addRoom(myRoom);
+	}
+	
+	@Test(expected = IllegalArgumentException.class)	
+	public void addRoomObject_null() {
+		Room myRoom = null;
+		roomService.addRoom(myRoom);
 	}
 
 	@Test

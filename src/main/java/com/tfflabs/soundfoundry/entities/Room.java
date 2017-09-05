@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 public class Room {
 	@Id
 	private String name;
+	private String description;
 	private Boolean isPlaying;
 	private Track currently_playing;
 	
