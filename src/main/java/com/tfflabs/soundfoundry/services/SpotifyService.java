@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.tfflabs.soundfoundry.entities.Session;
@@ -18,9 +19,12 @@ import com.wrapper.spotify.models.RefreshAccessTokenCredentials;
 
 @Service
 public class SpotifyService {
-	private final String client_id = "b9aa91638d7d4137aae536691ec3b5e4";
-	private final String client_secret = "54113bd51fad4aa99f15fd26603a0cd6";
-	private final String redirect_uri = "http://localhost:4200/auth_callback";
+	@Value("${spotify.client_id}")
+	private String client_id;
+	@Value("${spotify.client_secret}")
+	private String client_secret;
+	@Value("${sportify.redirect_uri}")
+	private String redirect_uri;
 
 	public Map<String, String> getPopUpUrl() {
 		final List<String> scopes = Arrays.asList("user-read-playback-state", "user-follow-modify", "user-follow-read",
@@ -35,7 +39,7 @@ public class SpotifyService {
 
 	public Session getAccessToken(Session session) throws IOException, WebApiException {
 		// build the api caller
-		Api api = Api.builder().clientId(client_id).clientSecret(client_secret).redirectURI(session.getRedirect_uri())
+		Api api = Api.builder().clientId(client_id).clientSecret(client_secret).redirectURI(redirect_uri)
 				.build();
 
 		// build the new token request
@@ -50,7 +54,7 @@ public class SpotifyService {
 
 	public Session refreshAccessToken(Session session) throws IOException, WebApiException {
 		// build the api caller
-		Api api = Api.builder().clientId(client_id).clientSecret(client_secret).redirectURI(session.getRedirect_uri())
+		Api api = Api.builder().clientId(client_id).clientSecret(client_secret).redirectURI(redirect_uri)
 				.build();
 		api.setRefreshToken(session.getRefresh_token());
 
