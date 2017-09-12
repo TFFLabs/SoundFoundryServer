@@ -1,5 +1,6 @@
 package com.tfflabs.soundfoundry.entities;
 
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -22,6 +23,7 @@ public class Track implements Comparable<Track>{
 	private float duration_ms = 0;
 	private float progress = 0;
 	private Integer progressPercentage = 0;
+	private Date updateDate;
 
 	public Track(String id) {
 		setId(id);
@@ -34,7 +36,13 @@ public class Track implements Comparable<Track>{
 	
 	@Override
 	public int compareTo(Track o) {
-		//Descendent by voters
-		return Integer.compare(o.getVoters().size(), this.getVoters().size());
+		//Descendent by voters, ascendant by dates
+		int orderValue = Integer.compare(o.getVoters().size(), this.getVoters().size());
+		if(orderValue == 0){
+			if (o.getUpdateDate() != null && this.getUpdateDate() != null){
+				orderValue = Long.compare(this.getUpdateDate().getTime(), o.getUpdateDate().getTime());	
+			}
+		}
+		return orderValue;
 	}
 }

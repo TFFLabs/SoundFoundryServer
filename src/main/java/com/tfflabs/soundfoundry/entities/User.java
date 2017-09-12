@@ -16,6 +16,7 @@ public class User {
 	private String display_name;
 	private String country;
 	private Set<Image> images = new HashSet<Image>();
+	private Session session = new Session();
 	
 	public User(String id){
 		setId(id);

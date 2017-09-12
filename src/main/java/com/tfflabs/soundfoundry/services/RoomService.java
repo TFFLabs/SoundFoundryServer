@@ -1,6 +1,7 @@
 package com.tfflabs.soundfoundry.services;
 
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
 import javax.annotation.PostConstruct;
@@ -81,6 +82,7 @@ public class RoomService {
 		List<Track> tracks = getRoomTracksByRoomName(roomName);
 		if (!tracks.stream().anyMatch(trackz -> trackz.getId().equals(track.getId()))) {
 			track.getRooms().add(getRoomByName(roomName));
+			track.setUpdateDate(new Date());
 			trackRepository.save(track);
 		}
 		publishRoomTracks(roomName);
@@ -96,6 +98,7 @@ public class RoomService {
 		tracks.stream().filter(trackz -> trackz.getId().equals(trackId)).forEach(tr -> {
 			if (tr.getVoters().stream().noneMatch(usr -> usr.getId().equals(user.getId()))) {
 				tr.getVoters().add(user);
+				tr.setUpdateDate(new Date());
 				trackRepository.save(tr);
 			}
 		});
