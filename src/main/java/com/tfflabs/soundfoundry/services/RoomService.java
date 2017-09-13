@@ -148,19 +148,10 @@ public class RoomService {
 		}else{
 			room.getCurrently_playing().increaseProgress(500);
 			if (room.getCurrently_playing().getProgressPercentage() >= 100) {
-				addDelay(1000);
 				room.setCurrently_playing(null);
 			}
 			roomRepository.save(room);
 			publishRoom(room);
-		}
-	}
-	
-	private void addDelay(int time_ms){
-		try {
-			Thread.sleep(1000);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
 		}
 	}
 	
