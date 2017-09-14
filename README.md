@@ -15,4 +15,4 @@ The application offers a set of endpoints as well as a websocket necessary to ke
 
 ## Run in dev with:
 
-`java -jar .\target\soundfoundry-0.0.1-SNAPSHOT.jar --spring.profiles.active=dev`
+`java -jar ./target/soundfoundry-0.0.1-SNAPSHOT.jar --spring.profiles.active=dev`
