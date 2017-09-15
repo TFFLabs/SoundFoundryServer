@@ -3,6 +3,7 @@ package com.tfflabs.soundfoundry.services;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import javax.annotation.PostConstruct;
 
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
+import com.google.common.base.Stopwatch;
 import com.tfflabs.soundfoundry.entities.Room;
 import com.tfflabs.soundfoundry.entities.Track;
 import com.tfflabs.soundfoundry.entities.User;
@@ -142,12 +144,16 @@ public class RoomService {
 	@Scheduled(fixedDelay = 500)
 	private void publishRoomCronTask() {
 		//TODO check how to do this for multiple rooms
+		Stopwatch stopwatch = Stopwatch.createStarted();
 		Room room = getRoomByName("myroom");
 		if (room.getCurrently_playing() == null) {
 			playNextSong(room);
 		}else{
-			room.getCurrently_playing().increaseProgress(500);
-			if (room.getCurrently_playing().getProgressPercentage() >= 100) {
+			stopwatch.stop();
+			// Adding database query time
+			room.getCurrently_playing().increaseProgress(500 + Math.toIntExact(stopwatch.elapsed(TimeUnit.MILLISECONDS)));
+			// 2% of tolerance to send the next song
+			if (room.getCurrently_playing().getProgressPercentage() >= 98) {
 				room.setCurrently_playing(null);
 			}
 			roomRepository.save(room);
