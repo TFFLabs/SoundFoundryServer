@@ -141,7 +141,7 @@ public class RoomService {
 		}
 	}
 
-	@Scheduled(fixedDelay = 500)
+	@Scheduled(fixedDelay = 100)
 	private void publishRoomCronTask() {
 		//TODO check how to do this for multiple rooms
 		Stopwatch stopwatch = Stopwatch.createStarted();
@@ -151,9 +151,8 @@ public class RoomService {
 		}else{
 			stopwatch.stop();
 			// Adding database query time
-			room.getCurrently_playing().increaseProgress(500 + Math.toIntExact(stopwatch.elapsed(TimeUnit.MILLISECONDS)));
-			// 2% of tolerance to send the next song
-			if (room.getCurrently_playing().getProgressPercentage() >= 98) {
+			room.getCurrently_playing().increaseProgress(100 + Math.toIntExact(stopwatch.elapsed(TimeUnit.MILLISECONDS)));
+			if (room.getCurrently_playing().getProgress() >= room.getCurrently_playing().getAdjustedDuration()) {
 				room.setCurrently_playing(null);
 			}
 			roomRepository.save(room);

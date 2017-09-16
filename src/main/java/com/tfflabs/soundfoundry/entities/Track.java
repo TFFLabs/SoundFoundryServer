@@ -31,7 +31,16 @@ public class Track implements Comparable<Track>{
 
 	public void increaseProgress(int valuems){
 		this.progress += valuems;
-		this.progressPercentage = Math.round((progress/duration_ms) * 100);
+		this.progressPercentage = Math.round((progress/getAdjustedDuration()) * 100);
+	}
+	
+	public float getAdjustedDuration(){
+		// 5% of tolerance to send the next song
+		return (float) (roundToThousands(this.getDuration_ms()) * 0.95);
+	}
+	
+	private float roundToThousands(float duration_ms){
+		return Math.round(duration_ms/1000)*1000;
 	}
 	
 	@Override
