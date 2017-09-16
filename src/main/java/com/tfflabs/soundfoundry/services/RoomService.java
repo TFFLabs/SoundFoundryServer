@@ -2,8 +2,11 @@ package com.tfflabs.soundfoundry.services;
 
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.Set;
+
 
 import javax.annotation.PostConstruct;
 
@@ -29,7 +32,7 @@ public class RoomService {
 	
 	@Autowired
 	private TrackRepository trackRepository;
-
+	
 	@Autowired
 	private SimpMessagingTemplate template;
 
@@ -139,6 +142,21 @@ public class RoomService {
 				publishRoomTracks(room.getName());
 			}
 		}
+	}
+	
+	public Set<User> getRoomUsersByRoomName(String roomName) {
+		Set<User> users =  roomRepository.findOne(roomName).getUsers();
+		//there is something weird in the sorting
+		return users;
+	}
+	
+	public void addUser(User user, String roomName) {
+		Room room = roomRepository.findOne(roomName);
+		if(null == room.getUsers()) {
+			room.setUsers(new HashSet<User>());
+		}
+		room.getUsers().add(user);
+		roomRepository.save(room);
 	}
 
 	@Scheduled(fixedDelay = 100)

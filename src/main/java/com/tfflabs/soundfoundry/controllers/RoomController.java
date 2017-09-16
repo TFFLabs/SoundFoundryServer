@@ -1,6 +1,7 @@
 package com.tfflabs.soundfoundry.controllers;
 
 import java.util.List;
+import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -30,12 +31,22 @@ public class RoomController {
 	public List<Track> getRoomTracks(@PathVariable("roomName") String roomName) {
 		return roomService.getRoomTracksByRoomName(roomName);
 	}
+	
+	@RequestMapping("/{roomName}/users")
+	public Set<User> getRoomUsers(@PathVariable("roomName") String roomName) {
+		return roomService.getRoomUsersByRoomName(roomName);
+	}
+	
+	@RequestMapping(value = "/{roomName}/user", method = RequestMethod.POST)
+	public void addUserToRoom(@PathVariable("roomName") String roomName, @RequestBody User user) {
+		roomService.addUser(user, roomName);
+	}
 
 	@RequestMapping(value = "/{roomName}/track", method = RequestMethod.POST)
 	public void addTrackToRoom(@PathVariable("roomName") String roomName, @RequestBody Track track) {
 		roomService.addTrack(track, roomName);
 	}
-
+	
 	@RequestMapping(value = "/{roomName}/track/{trackId}/voter", method = RequestMethod.POST)
 	public void upvoteTrack(@PathVariable("roomName") String roomName, @PathVariable("trackId") String trackId, @RequestBody User user) {
 		roomService.upvoteTrack(roomName, trackId, user);
