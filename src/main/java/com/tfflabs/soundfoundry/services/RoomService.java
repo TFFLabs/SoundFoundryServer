@@ -151,7 +151,7 @@ public class RoomService {
 		}else{
 			stopwatch.stop();
 			// Adding database query time
-			room.getCurrently_playing().increaseProgress(100 + Math.toIntExact(stopwatch.elapsed(TimeUnit.MILLISECONDS)));
+			room.getCurrently_playing().increaseProgress(200 + Math.toIntExact(stopwatch.elapsed(TimeUnit.MILLISECONDS)));
 			if (room.getCurrently_playing().getProgress() >= room.getCurrently_playing().getAdjustedDuration()) {
 				room.setCurrently_playing(null);
 			}
