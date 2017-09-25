@@ -141,7 +141,7 @@ public class RoomService {
 		}
 	}
 
-	@Scheduled(fixedDelay = 100)
+	@Scheduled(fixedRate = 200)
 	private void publishRoomCronTask() {
 		//TODO check how to do this for multiple rooms
 		Stopwatch stopwatch = Stopwatch.createStarted();
