@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.Set;
 
-
 import javax.annotation.PostConstruct;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +16,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
-import com.google.common.base.Stopwatch;
 import com.tfflabs.soundfoundry.entities.Room;
 import com.tfflabs.soundfoundry.entities.Track;
 import com.tfflabs.soundfoundry.entities.User;
@@ -159,17 +157,14 @@ public class RoomService {
 		roomRepository.save(room);
 	}
 
-	@Scheduled(fixedDelay = 100)
+	@Scheduled(fixedRate = 200)
 	private void publishRoomCronTask() {
 		//TODO check how to do this for multiple rooms
-		Stopwatch stopwatch = Stopwatch.createStarted();
 		Room room = getRoomByName("myroom");
 		if (room.getCurrently_playing() == null) {
 			playNextSong(room);
 		}else{
-			stopwatch.stop();
-			// Adding database query time
-			room.getCurrently_playing().increaseProgress(100 + Math.toIntExact(stopwatch.elapsed(TimeUnit.MILLISECONDS)));
+			room.getCurrently_playing().increaseProgress(200);
 			if (room.getCurrently_playing().getProgress() >= room.getCurrently_playing().getAdjustedDuration()) {
 				room.setCurrently_playing(null);
 			}
