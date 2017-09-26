@@ -4,7 +4,6 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 import java.util.Set;
 
 import javax.annotation.PostConstruct;
@@ -27,32 +26,32 @@ public class RoomService {
 
 	@Autowired
 	private RoomRepository roomRepository;
-	
+
 	@Autowired
 	private TrackRepository trackRepository;
-	
+
 	@Autowired
 	private SimpMessagingTemplate template;
 
 	@PostConstruct
-	public void temporalSetup(){
+	public void temporalSetup() {
 		String room = "myroom";
-		try{
+		try {
 			System.out.println(getRoomByName(room).getName() + " OBTAINED!!");
-		}catch (Exception e) {
+		} catch (Exception e) {
 			Room newRoom = new Room("myroom");
 			newRoom.setDescription("Awesome testing room");
 			addRoom(newRoom);
 		}
 	}
-	
+
 	public void addRoom(Room room) {
 		if (room == null) {
 			throw new IllegalArgumentException("Room can not be null.");
 		}
 		roomRepository.save(room);
 	}
-	
+
 	public void addRoom(String roomName) {
 		Room room = new Room(roomName);
 		roomRepository.save(room);
@@ -72,8 +71,8 @@ public class RoomService {
 	}
 
 	public List<Track> getRoomTracksByRoomName(String roomName) {
-		List<Track> tracks =  trackRepository.findByRooms_name(roomName);
-		//there is something weird in the sorting
+		List<Track> tracks = trackRepository.findByRooms_name(roomName);
+		// there is something weird in the sorting
 		Collections.sort(tracks);
 		return tracks;
 	}
@@ -96,7 +95,7 @@ public class RoomService {
 				|| StringUtils.isEmpty(user.getId())) {
 			throw new IllegalArgumentException("Room, Track and User id's can not be null");
 		}
-		
+
 		List<Track> tracks = getRoomTracksByRoomName(roomName);
 		tracks.stream().filter(trackz -> trackz.getId().equals(trackId)).forEach(tr -> {
 			if (tr.getVoters().stream().noneMatch(usr -> usr.getId().equals(user.getId()))) {
@@ -105,7 +104,7 @@ public class RoomService {
 				trackRepository.save(tr);
 			}
 		});
-		
+
 		publishRoomTracks(roomName);
 	}
 
@@ -123,47 +122,59 @@ public class RoomService {
 				}
 			});
 		});
-		
+
 		publishRoomTracks(roomName);
 	}
 
 	public void playNextSong(Room room) {
 		if (room.getCurrently_playing() == null) {
 			List<Track> tracks = getRoomTracksByRoomName(room.getName());
-			if(!CollectionUtils.isEmpty(tracks)){
+			if (!CollectionUtils.isEmpty(tracks)) {
 				room.setCurrently_playing(tracks.get(0));
-				
+
 				roomRepository.save(room);
 				publishRoom(room);
-				
+
 				trackRepository.delete(tracks.get(0));
 				publishRoomTracks(room.getName());
 			}
 		}
 	}
-	
+
 	public Set<User> getRoomUsersByRoomName(String roomName) {
-		Set<User> users =  roomRepository.findOne(roomName).getUsers();
-		//there is something weird in the sorting
+		Set<User> users = roomRepository.findOne(roomName).getUsers();
+		// there is something weird in the sorting
 		return users;
 	}
-	
+
 	public void addUser(User user, String roomName) {
 		Room room = roomRepository.findOne(roomName);
-		if(null == room.getUsers()) {
+		if (null == room.getUsers()) {
 			room.setUsers(new HashSet<User>());
 		}
 		room.getUsers().add(user);
 		roomRepository.save(room);
 	}
 
+	public void removeUser(String userId, String roomName) {
+		Room room = roomRepository.findOne(roomName);
+		if (!CollectionUtils.isEmpty(room.getUsers())) {
+			for (User user : room.getUsers()) {
+				if (user.getId().contentEquals(userId)) {
+					room.getUsers().remove(user);
+				}
+			}
+		}
+		roomRepository.save(room);
+	}
+
 	@Scheduled(fixedRate = 200)
 	private void publishRoomCronTask() {
-		//TODO check how to do this for multiple rooms
+		// TODO check how to do this for multiple rooms
 		Room room = getRoomByName("myroom");
 		if (room.getCurrently_playing() == null) {
 			playNextSong(room);
-		}else{
+		} else {
 			room.getCurrently_playing().increaseProgress(200);
 			if (room.getCurrently_playing().getProgress() >= room.getCurrently_playing().getAdjustedDuration()) {
 				room.setCurrently_playing(null);
@@ -172,7 +183,7 @@ public class RoomService {
 			publishRoom(room);
 		}
 	}
-	
+
 	private void publishRoomTracks(String roomName) {
 		template.convertAndSend("/topic/room/" + roomName + "/tracks", getRoomTracksByRoomName(roomName));
 	}

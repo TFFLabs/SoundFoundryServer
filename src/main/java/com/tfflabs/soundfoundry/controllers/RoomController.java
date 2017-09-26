@@ -4,10 +4,12 @@ import java.util.List;
 import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.tfflabs.soundfoundry.entities.Room;
@@ -38,21 +40,31 @@ public class RoomController {
 	}
 	
 	@RequestMapping(value = "/{roomName}/user", method = RequestMethod.POST)
+	@ResponseStatus(code=HttpStatus.NO_CONTENT)
 	public void addUserToRoom(@PathVariable("roomName") String roomName, @RequestBody User user) {
 		roomService.addUser(user, roomName);
 	}
+	
+	@RequestMapping(value = "/{roomName}/user/{userId}", method = RequestMethod.DELETE)
+	@ResponseStatus(code=HttpStatus.NO_CONTENT)
+	public void deleteUserFromRoom(@PathVariable("roomName") String roomName, @PathVariable("userId") String userId) {
+		roomService.removeUser(userId, roomName);
+	}
 
 	@RequestMapping(value = "/{roomName}/track", method = RequestMethod.POST)
+	@ResponseStatus(code=HttpStatus.NO_CONTENT)
 	public void addTrackToRoom(@PathVariable("roomName") String roomName, @RequestBody Track track) {
 		roomService.addTrack(track, roomName);
 	}
 	
 	@RequestMapping(value = "/{roomName}/track/{trackId}/voter", method = RequestMethod.POST)
+	@ResponseStatus(code=HttpStatus.NO_CONTENT)
 	public void upvoteTrack(@PathVariable("roomName") String roomName, @PathVariable("trackId") String trackId, @RequestBody User user) {
 		roomService.upvoteTrack(roomName, trackId, user);
 	}
 
 	@RequestMapping(value = "/{roomName}/track/{trackId}/voter/{userId}", method = RequestMethod.DELETE)
+	@ResponseStatus(code=HttpStatus.NO_CONTENT)
 	public void downvoteTrack(@PathVariable("roomName") String roomName, @PathVariable("trackId") String trackId,
 			@PathVariable("userId") String userId) {
 		roomService.downvoteTrack(roomName, trackId, userId);
