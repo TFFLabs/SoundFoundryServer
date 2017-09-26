@@ -8,6 +8,8 @@ import java.util.Set;
 
 import javax.annotation.PostConstruct;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -24,6 +26,8 @@ import com.tfflabs.soundfoundry.repositories.TrackRepository;
 @Service
 public class RoomService {
 
+	static Log log = LogFactory.getLog(RoomService.class.getName());
+	
 	@Autowired
 	private RoomRepository roomRepository;
 
@@ -148,15 +152,18 @@ public class RoomService {
 	}
 
 	public void addUser(User user, String roomName) {
+		log.info("Adding user with id: '" + user.getId() + "' to room with id: '" + roomName + "'");
 		Room room = roomRepository.findOne(roomName);
 		if (null == room.getUsers()) {
 			room.setUsers(new HashSet<User>());
 		}
 		room.getUsers().add(user);
 		roomRepository.save(room);
+		publishRoom(room);
 	}
 
 	public void removeUser(String userId, String roomName) {
+		log.info("Removing user with id: '" + userId + "' from room with id: '" + roomName + "'");
 		Room room = roomRepository.findOne(roomName);
 		if (!CollectionUtils.isEmpty(room.getUsers())) {
 			for (User user : room.getUsers()) {
@@ -166,6 +173,7 @@ public class RoomService {
 			}
 		}
 		roomRepository.save(room);
+		publishRoom(room);
 	}
 
 	@Scheduled(fixedRate = 200)
