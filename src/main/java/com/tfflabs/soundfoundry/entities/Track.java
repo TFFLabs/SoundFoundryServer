@@ -35,8 +35,8 @@ public class Track implements Comparable<Track>{
 	}
 	
 	public float getAdjustedDuration(){
-		// 1% of tolerance to send the next song
-		return (float) (roundToThousands(this.getDuration_ms()) * 0.99);
+		// 0.1% of tolerance to send the next song
+		return (float) (roundToThousands(this.getDuration_ms()) * 0.999);
 	}
 	
 	private float roundToThousands(float duration_ms){
