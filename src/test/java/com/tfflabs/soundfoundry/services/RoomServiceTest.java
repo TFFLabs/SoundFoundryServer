@@ -1,8 +1,5 @@
 package com.tfflabs.soundfoundry.services;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -17,9 +14,10 @@ import org.springframework.util.Assert;
 
 import com.tfflabs.soundfoundry.entities.Room;
 import com.tfflabs.soundfoundry.entities.Track;
+import com.tfflabs.soundfoundry.entities.TrackList;
 import com.tfflabs.soundfoundry.entities.User;
 import com.tfflabs.soundfoundry.repositories.RoomRepository;
-import com.tfflabs.soundfoundry.repositories.TrackRepository;
+import com.tfflabs.soundfoundry.repositories.TrackListRepository;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 public class RoomServiceTest {
@@ -39,7 +37,7 @@ public class RoomServiceTest {
 	private RoomRepository roomRepositoryMock;
 	
 	@MockBean
-	private TrackRepository trackRepository;
+	private TrackListRepository trackListRepository;
 	
 	@MockBean
 	private SimpMessagingTemplate template;
@@ -51,8 +49,8 @@ public class RoomServiceTest {
 		Track track = new Track("TrackId");
 		track.getVoters().add(user);
 		
-		List<Track> tracks = new ArrayList<Track>();
-		tracks.add(track);
+		TrackList trackList = new TrackList("TestRoom");
+		trackList.addTrack(user, track);
 		
 		Room testRoom = new Room("TestRoom");
 		
@@ -60,15 +58,14 @@ public class RoomServiceTest {
 		Mockito.when(roomRepositoryMock.findOne(Mockito.anyString())).thenReturn(null);
 		Mockito.when(roomRepositoryMock.findOne("TestRoom")).thenReturn(testRoom);
 		
-		Mockito.when(trackRepository.save(Mockito.any(Track.class))).thenReturn(null);
-		Mockito.when(trackRepository.findByRooms_name(Mockito.anyString())).thenReturn(new ArrayList<Track>());
-		Mockito.when(trackRepository.findByRooms_name("TestRoom")).thenReturn(tracks);
+		Mockito.when(trackListRepository.save(Mockito.any(TrackList.class))).thenReturn(null);
+		Mockito.when(trackListRepository.findByRoomName(Mockito.anyString())).thenReturn(new TrackList());
+		Mockito.when(trackListRepository.findByRoomName("TestRoom")).thenReturn(trackList);
 	}
 
 	@Test
 	public void addRoom() {
 		roomService.addRoom("TestRoom");
-
 	}
 
 	@Test(expected = IllegalArgumentException.class)
@@ -137,7 +134,9 @@ public class RoomServiceTest {
 	@Test
 	public void addTrack() {
 		String roomName = "TestRoom";
+		User user = new User("UserId");
 		Track track = new Track("TrackId");
+		track.getVoters().add(user);
 		roomService.addTrack(track, roomName);
 	}
 

@@ -17,13 +17,24 @@ public class Room {
 	private Boolean isPlaying;
 	private Track currently_playing;
 	private Set<User> users;
+	private SortMethod sortMethod;
 	
 	public Room(String name){
 		if(name == null || StringUtils.isEmpty(name.trim())){
 			throw new IllegalArgumentException("Room name can not be empty.");
 		}
 		setName(name);
+		setSortMethod(SortMethod.VOTES);
 		setIsPlaying(false);
+	}
+	
+	public void updateGeneralRoomFields(Room room){
+		if(!StringUtils.isEmpty(room.getDescription())){
+			this.setDescription(room.getDescription());
+		}
+		if(room.getSortMethod() != null){
+			this.setSortMethod(room.getSortMethod());
+		}
 	}
 	
 }

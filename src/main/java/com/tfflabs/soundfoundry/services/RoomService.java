@@ -1,7 +1,5 @@
 package com.tfflabs.soundfoundry.services;
 
-import java.util.Collections;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -18,21 +16,23 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import com.tfflabs.soundfoundry.entities.Room;
+import com.tfflabs.soundfoundry.entities.SortMethod;
 import com.tfflabs.soundfoundry.entities.Track;
+import com.tfflabs.soundfoundry.entities.TrackList;
 import com.tfflabs.soundfoundry.entities.User;
 import com.tfflabs.soundfoundry.repositories.RoomRepository;
-import com.tfflabs.soundfoundry.repositories.TrackRepository;
+import com.tfflabs.soundfoundry.repositories.TrackListRepository;
 
 @Service
 public class RoomService {
 
 	static Log log = LogFactory.getLog(RoomService.class.getName());
-	
+
 	@Autowired
 	private RoomRepository roomRepository;
 
 	@Autowired
-	private TrackRepository trackRepository;
+	private TrackListRepository trackRepository;
 
 	@Autowired
 	private SimpMessagingTemplate template;
@@ -47,6 +47,12 @@ public class RoomService {
 			newRoom.setDescription("Awesome testing room");
 			addRoom(newRoom);
 		}
+		try {
+			System.out.println(trackRepository.findByRoomName(room).getId() + " TRACK LIST OBTAINED!!");
+		} catch (Exception e) {
+			TrackList newTrackList = new TrackList("myroom");
+			trackRepository.save(newTrackList);
+		}
 	}
 
 	public void addRoom(Room room) {
@@ -59,6 +65,15 @@ public class RoomService {
 	public void addRoom(String roomName) {
 		Room room = new Room(roomName);
 		roomRepository.save(room);
+	}
+	
+	public void updateRoom(String roomName, Room room) {
+		if (room == null) {
+			throw new IllegalArgumentException("Room can not be null.");
+		}
+		Room aux = getRoomByName(roomName);
+		aux.updateGeneralRoomFields(room);
+		roomRepository.save(aux);
 	}
 
 	public Room getRoomByName(String roomName) {
@@ -75,21 +90,24 @@ public class RoomService {
 	}
 
 	public List<Track> getRoomTracksByRoomName(String roomName) {
-		List<Track> tracks = trackRepository.findByRooms_name(roomName);
-		// there is something weird in the sorting
-		Collections.sort(tracks);
-		return tracks;
+		if(SortMethod.ROUNDROBIN.toString().equals(getRoomByName(roomName).getSortMethod())){
+			return trackRepository.findByRoomName(roomName).getTracksListRoundRobin();
+		}else{
+			return trackRepository.findByRoomName(roomName).getTracksListSortedByVotes();	
+		}
 	}
 
 	public void addTrack(Track track, String roomName) {
 		if (track == null || StringUtils.isEmpty(track.getId())) {
 			throw new IllegalArgumentException("Track id can not be empty.");
 		}
-		List<Track> tracks = getRoomTracksByRoomName(roomName);
-		if (!tracks.stream().anyMatch(trackz -> trackz.getId().equals(track.getId()))) {
-			track.getRooms().add(getRoomByName(roomName));
-			track.setUpdateDate(new Date());
-			trackRepository.save(track);
+		if (CollectionUtils.isEmpty(track.getVoters())) {
+			throw new IllegalArgumentException("Track should have at least one vote.");
+		}
+		TrackList trackList = trackRepository.findByRoomName(roomName);
+		if (trackList != null){
+			trackList.addTrack((User) track.getVoters().toArray()[0], track);
+			trackRepository.save(trackList);
 		}
 		publishRoomTracks(roomName);
 	}
@@ -99,16 +117,11 @@ public class RoomService {
 				|| StringUtils.isEmpty(user.getId())) {
 			throw new IllegalArgumentException("Room, Track and User id's can not be null");
 		}
-
-		List<Track> tracks = getRoomTracksByRoomName(roomName);
-		tracks.stream().filter(trackz -> trackz.getId().equals(trackId)).forEach(tr -> {
-			if (tr.getVoters().stream().noneMatch(usr -> usr.getId().equals(user.getId()))) {
-				tr.getVoters().add(user);
-				tr.setUpdateDate(new Date());
-				trackRepository.save(tr);
-			}
-		});
-
+		TrackList trackList = trackRepository.findByRoomName(roomName);
+		if (trackList != null){
+			trackList.upvoteTrack(trackId, user);
+			trackRepository.save(trackList);
+		}
 		publishRoomTracks(roomName);
 	}
 
@@ -116,17 +129,13 @@ public class RoomService {
 		if (StringUtils.isEmpty(roomName) || StringUtils.isEmpty(trackId) || StringUtils.isEmpty(userId)) {
 			throw new IllegalArgumentException("Room, Track and User id's can not be null");
 		}
-
-		List<Track> tracks = getRoomTracksByRoomName(roomName);
-		tracks.stream().filter(trackz -> trackz.getId().equals(trackId)).forEach(tr -> {
-			tr.getVoters().forEach(usr -> {
-				if (usr.getId().equals(userId)) {
-					tr.getVoters().remove(usr);
-					trackRepository.save(tr);
-				}
-			});
-		});
-
+		
+		TrackList trackList = trackRepository.findByRoomName(roomName);
+		if (trackList != null){
+			trackList.downvoteTrack(trackId, userId);
+			trackRepository.save(trackList);
+		}
+		
 		publishRoomTracks(roomName);
 	}
 
@@ -139,7 +148,11 @@ public class RoomService {
 				roomRepository.save(room);
 				publishRoom(room);
 
-				trackRepository.delete(tracks.get(0));
+				TrackList trackList = trackRepository.findByRoomName(room.getName());
+				if (trackList != null){
+					trackList.removeSong(tracks.get(0));
+					trackRepository.save(trackList);
+				}
 				publishRoomTracks(room.getName());
 			}
 		}

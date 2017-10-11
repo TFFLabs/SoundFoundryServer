@@ -34,6 +34,11 @@ public class RoomController {
 		return roomService.getRoomTracksByRoomName(roomName);
 	}
 	
+	@RequestMapping(value = "/{roomName}", method = RequestMethod.PATCH)
+	public void updateRoom(@PathVariable("roomName") String roomName, @RequestBody Room room) {
+		roomService.updateRoom(roomName, room);
+	}
+	
 	@RequestMapping("/{roomName}/users")
 	public Set<User> getRoomUsers(@PathVariable("roomName") String roomName) {
 		return roomService.getRoomUsersByRoomName(roomName);

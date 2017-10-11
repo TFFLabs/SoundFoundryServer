@@ -15,7 +15,6 @@ public class Track implements Comparable<Track>{
 	@Id
 	private String id;
 	private String name;
-	private Set<Room> rooms = new HashSet<Room>();
 	private Set<User> voters = new HashSet<User>();
 	private Album album;
 	private Set<Artist> artists = new HashSet<Artist>();
