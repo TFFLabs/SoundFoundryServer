@@ -90,7 +90,7 @@ public class RoomService {
 	}
 
 	public List<Track> getRoomTracksByRoomName(String roomName) {
-		if(SortMethod.ROUNDROBIN.toString().equals(getRoomByName(roomName).getSortMethod())){
+		if(SortMethod.ROUNDROBIN.equals(getRoomByName(roomName).getSortMethod())){
 			return trackRepository.findByRoomName(roomName).getTracksListRoundRobin();
 		}else{
 			return trackRepository.findByRoomName(roomName).getTracksListSortedByVotes();	

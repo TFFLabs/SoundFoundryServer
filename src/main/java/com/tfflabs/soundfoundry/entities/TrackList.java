@@ -102,10 +102,17 @@ public class TrackList implements Cloneable{
 		if (track == null || StringUtils.isEmpty(track.getId())) {
 			throw new IllegalArgumentException("Track can not be empty.");
 		}
+		LinkedList<Track> userTracks = new LinkedList<>();
+		String userAux = null;
 		for (String user : getRoomTracks().keySet()) {
-			LinkedList<Track> userTracks = getRoomTracks().get(user);
-			userTracks.remove(track);
+			userTracks = getRoomTracks().get(user);
+			if(userTracks.remove(track)){
+				userAux = user;
+				break;
+			}
 		}
+		getRoomTracks().remove(userAux);
+		getRoomTracks().put(userAux, userTracks);
 	}
 	
 	@SuppressWarnings("unchecked")

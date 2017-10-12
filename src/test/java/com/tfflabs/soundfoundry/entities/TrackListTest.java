@@ -49,6 +49,16 @@ public class TrackListTest {
 		Assert.isTrue(trackList.getTracksListRoundRobin().get(3).getId().equals("trackThree"),
 				"RoudnRobin sorting not working");
 	}
+	
+	@Test
+	public void getTracksListRoundRobin_next() {
+		Assert.isTrue(trackList.getTracksListRoundRobin().get(0).getId().equals("trackOne"),
+				"RoudnRobin sorting not working");
+		trackList.removeSong(trackList.getTracksListRoundRobin().get(0));
+		System.out.println(trackList.getTracksListRoundRobin().get(0).getId());
+		Assert.isTrue(trackList.getTracksListRoundRobin().get(0).getId().equals("trackTwo"),
+				"RoudnRobin sorting not working");
+	}
 
 	@Test
 	public void getTracksListSortedByVotes() {
@@ -162,7 +172,7 @@ public class TrackListTest {
 	@Test
 	public void removeSong() {
 		int initialSize = trackList.getTracksListSortedByVotes().size();
-		trackList.removeSong(trackList.getTracksListSortedByVotes().get(0));
+		trackList.removeSong(trackList.getTracksListSortedByVotes().get(1));
 		Assert.isTrue(trackList.getTracksListSortedByVotes().size() == initialSize - 1, "Remove track not working");
 	}
 
